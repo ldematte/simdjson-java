@@ -6,6 +6,7 @@ import static org.simdjson.CharacterUtils.isStructuralOrWhitespace;
 import static org.simdjson.Tape.END_ARRAY;
 import static org.simdjson.Tape.END_OBJECT;
 import static org.simdjson.Tape.FALSE_VALUE;
+import static org.simdjson.Tape.KEY;
 import static org.simdjson.Tape.NULL_VALUE;
 import static org.simdjson.Tape.ROOT;
 import static org.simdjson.Tape.START_ARRAY;
@@ -168,7 +169,8 @@ class TapeBuilder {
     }
 
     void visitKey(byte[] buffer, int idx) {
-        visitString(buffer, idx);
+        tape.append(stringBufferIdx, KEY);
+        stringBufferIdx = stringParser.parseString(buffer, idx, stringBuffer, stringBufferIdx);
     }
 
     private void visitString(byte[] buffer, int idx) {

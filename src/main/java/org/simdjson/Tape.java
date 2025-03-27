@@ -13,6 +13,7 @@ class Tape {
     static final char TRUE_VALUE = 't';
     static final char FALSE_VALUE = 'f';
     static final char NULL_VALUE = 'n';
+    static final char KEY = 'k';
 
     private static final long JSON_VALUE_MASK = 0x00FFFFFFFFFFFFFFL;
     private static final int JSON_COUNT_MASK = 0xFFFFFF;

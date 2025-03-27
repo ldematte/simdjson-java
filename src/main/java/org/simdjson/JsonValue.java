@@ -5,21 +5,22 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.NoSuchElementException;
 
+import static java.nio.charset.StandardCharsets.UTF_8;
 import static org.simdjson.Tape.DOUBLE;
 import static org.simdjson.Tape.FALSE_VALUE;
 import static org.simdjson.Tape.INT64;
+import static org.simdjson.Tape.KEY;
 import static org.simdjson.Tape.NULL_VALUE;
 import static org.simdjson.Tape.START_ARRAY;
 import static org.simdjson.Tape.START_OBJECT;
 import static org.simdjson.Tape.STRING;
 import static org.simdjson.Tape.TRUE_VALUE;
-import static java.nio.charset.StandardCharsets.UTF_8;
 
 public class JsonValue {
 
     private final Tape tape;
     private final byte[] buffer;
-    private final int tapeIdx;
+    private int tapeIdx;
     private final byte[] stringBuffer;
 
     JsonValue(Tape tape, int tapeIdx, byte[] stringBuffer, byte[] buffer) {
@@ -27,6 +28,22 @@ public class JsonValue {
         this.tapeIdx = tapeIdx;
         this.stringBuffer = stringBuffer;
         this.buffer = buffer;
+    }
+
+    public char getCurrentType() {
+        return tape.getType(tapeIdx);
+    }
+
+    public char next() {
+        switch (tape.getType(tapeIdx)) {
+            case INT64, DOUBLE: {
+                tapeIdx += 2;
+            }
+            default: {
+                tapeIdx += 1;
+            }
+        }
+        return getCurrentType();
     }
 
     public boolean isArray() {
@@ -55,7 +72,8 @@ public class JsonValue {
     }
 
     public boolean isString() {
-        return tape.getType(tapeIdx) == STRING;
+        char type = tape.getType(tapeIdx);
+        return type == STRING || type == KEY;
     }
 
     public Iterator<JsonValue> arrayIterator() {
@@ -122,7 +140,7 @@ public class JsonValue {
             case TRUE_VALUE, FALSE_VALUE -> {
                 return String.valueOf(asBoolean());
             }
-            case STRING -> {
+            case STRING, KEY -> {
                 return asString();
             }
             case NULL_VALUE -> {
